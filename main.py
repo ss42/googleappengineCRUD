@@ -26,48 +26,57 @@ jinja_environment = jinja2.Environment(autoescape=True,
 
 class Movie(ndb.Model):
     title = ndb.StringProperty()
-    year = ndb.StringProperty()
+    year = ndb.IntegerProperty()
     rated = ndb.StringProperty()
-    # released = ndb.DateProperty()
-    # runtime = ndb.StringProperty()
-    # genre = ndb.StringProperty()
     director = ndb.StringProperty()
-    # #actors = [ndb.StringProperty()]
-    # # plot = ndb.StringProperty()
-    # movieID = ndb.StringProperty()
+
+Movie1 = Movie(title='The Departed',year=2006,rated='R',director="Martin Scorsese")
+Movie1.key =  ndb.Key('Movie', 'Action')
+Movie1.put()
+Movie2 = Movie(title='The Hero',year=2011,rated='R',director="Robert Hanson")
+Movie2.key =  ndb.Key('Movie', 'Comedy')
+Movie2.put()
+Movie3 = Movie(title='The Zero',year=2016,rated='R',director="Tom Hank")
+Movie3.key =  ndb.Key('Movie', 'Cartoon')
+Movie3.put()
+Movie4 = Movie(title='Hangover',year=2010,rated='R',director="Martin Joker")
+Movie4.key =  ndb.Key('Movie', 'SciFi')
+Movie4.put()
+Movie5 = Movie(title='Jason Bourne',year=2016,rated='R',director="Joseph Scorsese")
+Movie5.key =  ndb.Key('Movie', 'Animation')
+Movie5.put()
 
 
-# [END delete_entity]
+
+
 class MainPage(webapp2.RequestHandler):
 
-
-
-
-
     def get(self):
-
-
         test = Movie()
-        test.populate(
-            title='The Departed',
-            year='2006',
-            rated='R',
-            director="Martin Scorsese"
-        )
-        test.key = ndb.Key('Movie', test.director)
-
-        test.put()
-        testkey = test.key
-        testid = testkey.id()
+        # test.populate(
+        #     title='The Departed',
+        #     year='2006',
+        #     rated='R',
+        #     director="Martin Scorsese"
+        # )
+        #
+        # test.key = ndb.Key('Movie', test.director)
+        # k = test.key
+        # getID = k.id()
+        #
+        # test.put()
+        # testkey = test.key
+        # testid = testkey.id()
         template = jinja_environment.get_template('index.htm')
 
-        updatekey = "Martin Scorsese"
-        k = ndb.Key('Movie', updatekey)
-        e = k.get()
-        # print(e)
-        e.director = "Steve Jobs"
-        e.put()
-        print(e)
+    # #updateing stuff
+    #     updatekey = "Martin Scorsese"
+    #     k = ndb.Key('Movie', updatekey)
+    #     e = k.get()
+    #     # print(e)
+    #     e.director = "Steve Jobs"
+    #     e.put()
+    #     print(e)
 
 
         #retrieving works
@@ -78,8 +87,10 @@ class MainPage(webapp2.RequestHandler):
             'movieRated' : test.rated,
             'directorName': test.director
         }
-        print(testkey)
-
+        q = ndb.Movie.query().filter(Movie.year == 2006)
+        results = q.get()
+        for entity in results:
+            print(entity)
 
 
 
@@ -90,19 +101,29 @@ class MainPage(webapp2.RequestHandler):
         y.delete()
         print("deleting stuff")
 
-
-
         self.response.write(template.render(context))
 
+        query = Movie.query(kind='Movie', order=('-timestamp',))
+
+        results = [
+            'Time: {timestamp} Addr: {user_ip}'.format(**x)
+            for x in query.fetch(limit=10)]
+
+        output = 'Last 10 visits:\n{}'.format('\n'.join(results))
+
+    def update(self):
+        temp = ndb.Key('Movie', 'Animation')
+        x = temp.get()
+        x.director = 'Sanjay Shrestha'
+        x.put()
 
     def post(self):
         test = Movie()
         test.title = self.request.get("title")
-        test.year = self.request.get("year")
+        test.year = int(self.request.get("year"))
         test.rated = self.request.get("rated")
         test.director = self.request.get("director")
         test.key = ndb.Key('Movie', test.director)
-
         test.put()
 
 application = webapp2.WSGIApplication([
